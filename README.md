@@ -16,7 +16,7 @@ sudo yum update -y
 ### 2. Gitのインストール
 ソースコードをEC2インスタンスにダウンロードするため、gitをインストールする
 ```shell
-sudo yum update -y
+sudo yum install -y git
 ```
 
 ### 3. goのインストール
@@ -30,8 +30,8 @@ sudo yum install -y golang
 go version
 ```
 
-### 4. ソースコードのインストール
-gitコマンドで、ソースコードをインストールする
+### 4. ソースコードのダウンロード
+gitコマンドで、ソースコードをダウンロードする
 ```shell
 git clone https://github.com/CloudTechOrg/cloudtech-reservation-api.git
 ```
@@ -45,8 +45,37 @@ nohup go run main.go &
 ```
 
 ### 6. 再起動時に起動されるように設定
+EC2インスタンスの再起動時にAPIが起動するように設定する
 
-ToDo
+まずは以下のコマンドで、systemdにファイルを作る
+```shell
+sudo vi /etc/systemd/system/goserver.service
+```
+
+viエディターが開かれるので、以下のコードを貼り付ける
+```
+[Unit]
+Description=Go Server
+
+[Service]
+WorkingDirectory=/home/ec2-user/my-go-api
+ExecStart=/usr/bin/go run main.go
+User=ec2-user
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+ESCボタンをクリックし、:wqにて保存してファイルを閉じた後、以下のコマンドで設定を反映させる
+
+```shell
+sudo systemctl daemon-reload
+sudo systemctl enable goserver.service
+sudo systemctl start goserver.service
+```
+
+以上で、EC2インスタンスの再起動にAPIが起動されるようになる
 
 ## 起動方法
 起動したAPIをローカル（同じEC2内）で呼び出したい場合、下記のURLにアクセスする
