@@ -36,15 +36,7 @@ gitコマンドで、ソースコードをダウンロードする
 git clone https://github.com/CloudTechOrg/cloudtech-reservation-api.git
 ```
 
-### 5. APIの起動
-以下のコマンドでAPIを起動する
-
-```shell
-cd cloudtech-reservation-api
-nohup go run main.go &
-```
-
-### 6. 再起動時に起動されるように設定
+### 5. 再起動時に起動されるように設定
 EC2インスタンスの再起動時にAPIが起動するように設定する
 
 まずは以下のコマンドで、systemdにファイルを作る
@@ -58,7 +50,7 @@ viエディターが開かれるので、以下のコードを貼り付ける
 Description=Go Server
 
 [Service]
-WorkingDirectory=/home/ec2-user/my-go-api
+WorkingDirectory=/home/ec2-user/cloudtech-reservation-api
 ExecStart=/usr/bin/go run main.go
 User=ec2-user
 Restart=always
