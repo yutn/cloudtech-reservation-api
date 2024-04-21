@@ -8,7 +8,15 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
+
+func init() {
+	// .envファイルから環境変数を読み込む
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
+}
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	// CORSヘッダーを設定
@@ -64,7 +72,7 @@ func database_test() (int, error) {
 	// データベースに接続
 	connection, err := sql.Open(
 		"mysql",
-		"root:CloudTech2024!@tcp(localhost:3306)/testdb")
+		connectionString)
 	if err != nil {
 		return 0, err
 	}
