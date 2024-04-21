@@ -83,3 +83,50 @@ http://[IPアドレス]:8080
 ```
 
 # データベース接続
+## 概要
+APIサーバから、RDSに接続できるように設定する
+
+## 前提
+- APIサーバのEC2インスタンスにsshなどでログインしていること
+
+## 手順
+
+### 1. mysqlのインストール
+
+パッケージマネージャーdefのインストール
+```shell
+sudo dnf update -y
+```
+
+MSQLのリポジトリ設定
+```shell
+sudo rpm -Uvh https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm
+```
+
+MySQLサーバのインストール
+```shell
+sudo dnf install mysql-community-server -y
+```
+
+MySQLサービスの起動
+```shell
+sudo systemctl start mysqld
+```
+
+システム起動時にMySQLが自動起動するように設定
+```shell
+sudo systemctl enable mysqld
+shell
+```
+
+### 2. RDSに接続
+
+以下のコマンドで、RDSのMySQLに接続
+```
+mysql -h 【エンドポイント】 -P 3306 -u admin -p
+```
+
+エンドポイントは、RDSのコンソールから確認可能
+
+
+### 3. データベースとテーブルの作成
