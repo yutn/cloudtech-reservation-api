@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -46,6 +48,19 @@ func TestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func database_test() (int, error) {
+	// 環境変数からデータベース接続の各要素を取得
+	username := os.Getenv("DB_USERNAME")
+	password := os.Getenv("DB_PASSWORD")
+	servername := os.Getenv("DB_SERVERNAME")
+	port := os.Getenv("DB_PORT")
+	dbname := os.Getenv("DB_NAME")
+
+	// 接続文字列を組み立て
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, servername, port, dbname)
+	if connectionString == "" {
+		log.Fatal("DB connection string is not set")
+	}
+
 	// データベースに接続
 	connection, err := sql.Open(
 		"mysql",
