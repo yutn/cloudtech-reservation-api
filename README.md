@@ -69,6 +69,54 @@ sudo systemctl start goserver.service
 
 以上で、EC2インスタンスの再起動にAPIが起動されるようになる
 
+### 6. リバースプロキシの設定
+GoのAPIは8080ポートで起動しているため、80ポートで起動させるためにnginxのリバースプロキシを利用する。
+
+以下のコマンドでnginxをインストールする
+```shell
+sudo yum install nginx
+```
+
+インストール後、下記コマンドでNginxを起動する
+```shell
+sudo systemctl start nginx
+```
+
+再起動時に起動されるように設定する
+```
+sudo systemctl enable nginx
+```
+
+`http://[api-serber-01のIPアドレス]`をブラウザに入力することで、`Weblome to nginx!`のページが開かれることを確認する
+
+以下のコマンドで、nginxの設定ファイルを開く
+```shell
+sudo vi /etc/nginx/nginx.conf
+```
+
+`server { ・・・ }` の部分を、下記内容に変更
+```
+server {
+        listen 80;
+        server_name _;
+
+        location / {
+            proxy_pass http://localhost:8080;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+    }
+```
+
+下記コマンドで、nginxを再起動する
+```shell
+sudo systemctl restart nginx
+```
+
+
 ## 起動方法
 起動したAPIをローカル（同じEC2内）で呼び出したい場合、下記のURLにアクセスする
 
@@ -130,3 +178,31 @@ mysql -h 【エンドポイント】 -P 3306 -u admin -p
 
 
 ### 3. データベースとテーブルの作成
+
+以下のコマンドで、reservation_dbというデータベースを作る
+```sql
+create database reservation_db;
+```
+
+以下のコマンドで、Reservationsテーブルを作成する
+```sql
+CREATE TABLE reservation_db.Reservations (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    company_name VARCHAR(255) NOT NULL,
+    reservation_date DATE NOT NULL,
+    number_of_people INT NOT NULL
+);
+```
+
+以下のコマンドで、Reservationsテーブルに1件追加する
+```sql
+INSERT INTO reservation_db.Reservations (company_name, reservation_date, number_of_people)
+VALUES ('株式会社テスト', '2024-04-21', 5);
+```
+
+### 5. 動作確認
+以下のCURLコマンドで、データベース接続が正しく行われていることを確認する
+
+```shell
+curl http://localhost:8080/test
+```
