@@ -1,50 +1,48 @@
 # APIサーバの設定
 ## 概要
-EC2インスタンスに対してAPIサーバとして起動させる設定を行います。
+この説明は、ハンズオン課題における`Week2：基本サービス`にて必要となる、APIサーバに対する設定方法を説明しています。
 
 ## 前提
-- EC2インスタンスssh接続などでログインしていること
+- APIサーバのEC2インスタンスにssh接続などでログインしていること
 
 ## 手順
 
 ### 1. yumのアップデート
-各種インストールを行うために使用するyumパッケージを最新化する
+システムを最新の状態に保つためにyumパッケージをアップデートします。
 ```shell
 sudo yum update -y
 ```
 
 ### 2. Gitのインストール
-ソースコードをEC2インスタンスにダウンロードするため、gitをインストールする
+EC2インスタンスにソースコードをダウンロードするために、Gitをインストールします。
 ```shell
 sudo yum install -y git
 ```
 
-### 3. goのインストール
-APIとして起動させるためのGoのインストールを行う
+### 3. Goのインストール
+APIサーバとして機能するGo言語をインストールします。
 ```shell
 sudo yum install -y golang
 ```
-
-インストール後、下記コマンドでバージョン確認を行う
+インストール後、Goのバージョンを確認します。
 ```shell
 go version
 ```
 
 ### 4. ソースコードのダウンロード
-gitコマンドで、ソースコードをダウンロードする
+Gitを使用してソースコードをダウンロードします。
 ```shell
 git clone https://github.com/CloudTechOrg/cloudtech-reservation-api.git
 ```
 
-### 5. 再起動時に起動されるように設定
-EC2インスタンスの再起動時にAPIが起動するように設定する
+### 5. サービスの自動起動設定
+システムの再起動時にもAPIが自動で起動するようにsystemdを設定します。
 
-まずは以下のコマンドで、systemdにファイルを作る
+まずはviエディターを使用し、サービス起動時の設定ファイルを作成します。
 ```shell
 sudo vi /etc/systemd/system/goserver.service
 ```
-
-viエディターが開かれるので、以下のコードを貼り付ける
+以下の内容をファイルに追記し、保存を行います。
 ```
 [Unit]
 Description=Go Server
@@ -58,77 +56,39 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 ```
-
-ESCボタンをクリックし、:wqにて保存してファイルを閉じた後、以下のコマンドで設定を反映させる
-
+設定を有効にし、サービスを開始します。
 ```shell
 sudo systemctl daemon-reload
 sudo systemctl enable goserver.service
 sudo systemctl start goserver.service
 ```
 
-以上で、EC2インスタンスの再起動にAPIが起動されるようになる
-
 ### 6. リバースプロキシの設定
-GoのAPIは8080ポートで起動しているため、80ポートで起動させるためにnginxのリバースプロキシを利用する。
-
-以下のコマンドでnginxをインストールする
+8080ポートで動作するGoのAPIを80ポートで利用できるように、Nginxをリバースプロキシとして設定します。
 ```shell
 sudo yum install nginx
-```
-
-インストール後、下記コマンドでNginxを起動する
-```shell
 sudo systemctl start nginx
-```
-
-再起動時に起動されるように設定する
-```
 sudo systemctl enable nginx
 ```
-
-`http://[api-serber-01のIPアドレス]`をブラウザに入力することで、`Weblome to nginx!`のページが開かれることを確認する
-
-以下のコマンドで、nginxの設定ファイルを開く
+Nginxの設定ファイルを編集し、適切なリバースプロキシ設定を行います。
 ```shell
 sudo vi /etc/nginx/nginx.conf
 ```
-
-`server { ・・・ }` の部分を、下記内容に変更
-```
-server {
-        listen 80;
-        server_name _;
-
-        location / {
-            proxy_pass http://localhost:8080;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_cache_bypass $http_upgrade;
-        }
-    }
-```
-
-下記コマンドで、nginxを再起動する
+設定を更新した後、Nginxを再起動します。
 ```shell
 sudo systemctl restart nginx
 ```
 
-
 ## 起動方法
-起動したAPIをローカル（同じEC2内）で呼び出したい場合、下記のURLにアクセスする
-
+下記は、ローカルまたは外部からAPIを呼び出す方法です。
 ```
+# ローカルからのアクセス
 http://localhost:8080
-```
 
-外部から呼び出したい場合、以下のURLにアクセスする（セキュリティグループなどのアクセス権限が許可されている前提）
-
-```
+# 外部からのアクセス
 http://[IPアドレス]:8080
 ```
+
 
 # データベース接続
 ## 概要
