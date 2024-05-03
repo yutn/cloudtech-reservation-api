@@ -89,10 +89,9 @@ http://localhost:8080
 http://[IPアドレス]:8080
 ```
 
-
 # Week3：データベース接続
 ## 概要
-APIサーバから、RDSに接続できるように設定する
+この説明は、ハンズオン課題における`Week3：データベースとストレージ`にて必要となる、APIサーバ（EC2インスタンス）からDBサーバ（RDS）に接続するための設定を説明しています。
 
 ## 前提
 - APIサーバのEC2インスタンスにsshなどでログインしていること
@@ -101,27 +100,27 @@ APIサーバから、RDSに接続できるように設定する
 
 ### 1. mysqlのインストール
 
-パッケージマネージャーdefのインストール
+パッケージマネージャー（DNF）の更新を行います。
 ```shell
 sudo dnf update -y
 ```
 
-MSQLのリポジトリ設定
+MySQLの公式リポジトリをシステムに追加します。
 ```shell
 sudo rpm -Uvh https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm
 ```
 
-MySQLサーバのインストール
+MySQLサーバのインストールを行います。
 ```shell
 sudo dnf install mysql-community-server -y
 ```
 
-MySQLサービスの起動
+MySQLサービスの起動を行います。
 ```shell
 sudo systemctl start mysqld
 ```
 
-システム起動時にMySQLが自動起動するように設定
+システム起動時にMySQLが自動起動するように設定します。
 ```shell
 sudo systemctl enable mysqld
 shell
@@ -131,20 +130,20 @@ shell
 
 以下のコマンドで、RDSのMySQLに接続
 ```
-mysql -h 【エンドポイント】 -P 3306 -u admin -p
+mysql -h 【エンドポイント】 -P 3306 -u 【ユーザ名】 -p
 ```
 
-エンドポイントは、RDSのコンソールから確認可能
+AWS RDSインスタンスのMySQLデータベースに接続します。以下のコマンドを実行前に、適切なエンドポイントとユーザ名に置き換えてください。また、パスワードの入力を求められるため、はRDSインスタンス作成時に指定したものを入力してください。
 
 
 ### 3. データベースとテーブルの作成
 
-以下のコマンドで、reservation_dbというデータベースを作る
+`reservation_db`データベースを作る
 ```sql
 create database reservation_db;
 ```
 
-以下のコマンドで、Reservationsテーブルを作成する
+`Reservations`テーブルを作成する
 ```sql
 CREATE TABLE reservation_db.Reservations (
     ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -154,14 +153,14 @@ CREATE TABLE reservation_db.Reservations (
 );
 ```
 
-以下のコマンドで、Reservationsテーブルに1件追加する
+`Reservations`テーブルにサンプルデータを1件追加する
 ```sql
 INSERT INTO reservation_db.Reservations (company_name, reservation_date, number_of_people)
 VALUES ('株式会社テスト', '2024-04-21', 5);
 ```
 
 ### 5. 動作確認
-以下のCURLコマンドで、データベース接続が正しく行われていることを確認する
+APIがデータベースに正しく接続できているか確認するため、以下のCURLコマンドを使用します。
 
 ```shell
 curl http://localhost:8080/test
