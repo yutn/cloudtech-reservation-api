@@ -165,3 +165,130 @@ APIがデータベースに正しく接続できているか確認するため�
 ```shell
 curl http://localhost:8080/test
 ```
+
+# Week9:コンテナー
+
+# ローカル環境での実行方法
+## Goのインストール
+```shell
+brew install go
+```
+
+## MySQLのインストール
+```shell
+brew install mysql
+```
+
+## テストデータを作成
+
+MySQLを起動する
+```shell
+mysql.server start
+```
+
+MySQLにログインする
+```shell
+mysql -u root -p
+```
+
+`reservation_db`データベースを作る
+```sql
+create database reservation_db;
+```
+
+`Reservations`テーブルを作成する
+```sql
+CREATE TABLE reservation_db.Reservations (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    company_name VARCHAR(255) NOT NULL,
+    reservation_date DATE NOT NULL,
+    number_of_people INT NOT NULL
+);
+```
+
+## Goのモジュール作成とパッケージインストール
+
+モジュール作成
+```shell
+go mod init cloudtech-reservation-api
+```
+
+パッケージのインストール
+```shell
+go get github.com/go-sql-driver/mysql
+```
+
+## 環境変数の作成
+
+.envファイルの作成
+
+ファイルの作成
+```shell
+touch .env
+```
+
+下記の内容を記載
+```
+DB_USERNAME=root
+DB_PASSWORD= #MySQLのパスワードに置き換える
+DB_SERVERNAME=localhost
+DB_PORT=3306
+DB_NAME=reservation_db
+```
+
+## ローカル環境での実行方法
+
+Goのビルド
+```shell
+go run main.go
+```
+
+curlコマンドで実行
+```shell
+curl http://localhost:8080
+curl http://localhost:8080/test
+```
+
+## Dockerによる実行方法
+
+Dockerのインストール
+https://matsuand.github.io/docs.docker.jp.onthefly/desktop/mac/install/
+
+ビルドの実施
+
+```shell
+docker build -t cloudtech-reservation-api . 
+```
+
+イメージの起動
+
+```shell
+docker run -e DB_SERVERNAME=host.docker.internal -p 8080:8080 cloudtech-reservation-api
+```
+
+curlコマンドの実行
+```shell
+curl http://localhost:8080
+curl http://localhost:8080/test
+```
+
+## ECRのプッシュ
+ECRへのログイン
+```shell
+aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 【アカウントID】.dkr.ecr.ap-northeast-1.amazonaws.com
+```
+
+Dockerイメージのビルド（linux/x86_64環境向けにビルド）
+```shell
+docker build --platform linux/x86_64 -t cloudtech-reservation-api .
+```
+
+Dockerイメージのタグ付け
+```shell
+docker tag cloudtech-reservation-api:latest 【アカウントID】.dkr.ecr.ap-northeast-1.amazonaws.com/cloudtech-reservation-api:latest
+```
+
+Dockerイメージのプッシュ
+```shell
+docker push 【アカウントID】.dkr.ecr.ap-northeast-1.amazonaws.com/cloudtech-reservation-api:latest
+```
