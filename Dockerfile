@@ -28,8 +28,8 @@ COPY --from=builder /app/server .
 # 環境変数ファイルをコピー
 COPY .env .
 
-# ポート8080を開放
-EXPOSE 8080
+# ポート80を開放
+EXPOSE 80
 
 # 実行可能ファイルを実行
 CMD ["./server"]

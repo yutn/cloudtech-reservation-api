@@ -263,13 +263,13 @@ docker build -t cloudtech-reservation-api .
 イメージの起動
 
 ```shell
-docker run -e DB_SERVERNAME=host.docker.internal -p 8080:8080 cloudtech-reservation-api
+docker run -e DB_SERVERNAME=host.docker.internal -p 80:80 cloudtech-reservation-api
 ```
 
 curlコマンドの実行
 ```shell
-curl http://localhost:8080
-curl http://localhost:8080/test
+curl http://localhost
+curl http://localhost/test
 ```
 
 ## ECRのプッシュ

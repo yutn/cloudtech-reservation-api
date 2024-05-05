@@ -98,13 +98,15 @@ func database_test() (int, error) {
 }
 
 func main() {
+	apiport := os.Getenv("API_PORT")
+
 	// /パスにアクセスがあった場合に、helloHandler関数を実行するように設定
 	http.HandleFunc("/", helloHandler)
 	http.HandleFunc("/test", TestHandler)
 
 	// 8080ポートでサーバーを起動
-	fmt.Println("HTTPサーバを起動しました。ポート: 8080")
-	err := http.ListenAndServe(":8080", nil)
+	fmt.Println("HTTPサーバを起動しました。ポート: " + apiport)
+	err := http.ListenAndServe(":"+apiport, nil)
 	if err != nil {
 		fmt.Println("HTTPサーバの起動に失敗しました: ", err)
 	}
