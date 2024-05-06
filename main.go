@@ -29,8 +29,11 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 		return // プリフライトリクエストにはステータス200で応答して、処理を終了する
 	}
 
+	// クライアントのIPアドレスを取得
+	clientIP := r.RemoteAddr
+
 	// hello worldという文字列をレスポンスとして返す
-	fmt.Fprintf(w, "API接続テストが成功しました")
+	fmt.Fprintf(w, "API接続テストが成功しました（IPアドレス:%s）", clientIP)
 }
 
 func TestHandler(w http.ResponseWriter, r *http.Request) {
