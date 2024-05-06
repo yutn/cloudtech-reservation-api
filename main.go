@@ -99,6 +99,9 @@ func database_test() (int, error) {
 
 func main() {
 	apiport := os.Getenv("API_PORT")
+	if apiport == "" {
+		apiport = "8080"
+	}
 
 	// /パスにアクセスがあった場合に、helloHandler関数を実行するように設定
 	http.HandleFunc("/", helloHandler)
