@@ -74,6 +74,24 @@ Nginxの設定ファイルを編集し、適切なリバースプロキシ設定
 ```shell
 sudo vi /etc/nginx/nginx.conf
 ```
+
+`server { ・・・ }` の部分を、下記内容に変更します
+```
+server {
+        listen 80;
+        server_name _;
+        location / {
+            proxy_pass http://localhost:8080;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+    }
+```
+
+
 設定を更新した後、Nginxを再起動します。
 ```shell
 sudo systemctl restart nginx
