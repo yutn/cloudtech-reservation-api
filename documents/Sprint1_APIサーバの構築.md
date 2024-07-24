@@ -1,5 +1,5 @@
 # 概要
-この説明は、ハンズオン課題における`Week2：基本サービス`にて必要となる、APIサーバに対する設定方法を説明しています。
+この説明は、ハンズオン課題における`Sprint1：AWS基本サービス1`にて必要となる、APIサーバに対する設定方法を説明しています。
 
 # 前提
 - APIサーバのEC2インスタンスにssh接続などでログインしていること
@@ -31,6 +31,7 @@ go version
 ## 4. ソースコードのダウンロード
 Gitを使用してソースコードをダウンロードします。
 ```shell
+cd /home/ec2-user/
 git clone https://github.com/CloudTechOrg/cloudtech-reservation-api.git
 ```
 
