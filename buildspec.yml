@@ -1,34 +1,21 @@
 version: 0.2
-
 env:
   variables:
-    ECR_REPOSITORY: 010526285124.dkr.ecr.ap-northeast-1.amazonaws.com/api-repository
-
+    ECR_REPO_NAME: api-repository
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin ${ECR_REPOSITORY}
+      - echo "hello"
+      
+      #ECR login
+      - ECR_MAIN_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+      - aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_MAIN_URI}
+
+      - ECR_IMAGE_URI="${ECR_MAIN_URI}/${ECR_REPO_NAME}:latest"
   build:
     commands:
-      - echo Building the Docker image...
-      - docker build -t container-test-app .
-      - docker tag container-test-app:latest ${ECR_REPOSITORY}:latest
+      - docker build -t ${ECR_REPO_NAME}:latest .
   post_build:
     commands:
-      - echo Pushing the Docker image...
-      - docker push ${ECR_REPOSITORY}:latest
-      - echo Build completed on `date`
-      - echo Creating imagedefinitions.json...
-      - |
-        echo '[
-          {
-            "name": "container-test-app",
-            "imageUri": "'${ECR_REPOSITORY}':latest"
-          }
-        ]' > imagedefinitions.json
-      - echo imagedefinitions.json created.
-
-artifacts:
-  files:
-    - imagedefinitions.json
+      - docker tag ${ECR_REPO_NAME}:latest ${ECR_IMAGE_URI}
+      - docker push ${ECR_IMAGE_URI}
